@@ -10,10 +10,8 @@ type CreateUserInput struct {
 	Role         string    `json:"role" db:"role" binding:"required"` // customer, seller, admin
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
-
-// type SignUpInput struct { // not used
-// 	Name     string `json:"name" binding:"required"`
-// 	Email    string `json:"email" binding:"required,email"`
-// 	Password string `json:"password" binding:"required,min=6"`
-// 	// Role не включаємо - встановлюється автоматично
-// }
+type SignUpInput struct { // not used
+	Name     string `json:"name" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}

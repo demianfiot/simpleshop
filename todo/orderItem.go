@@ -9,5 +9,5 @@ type OrderItem struct {
 	Quantity    int       `json:"quantity" db:"quantity"`
 	Price       float64   `json:"price" db:"price"`
 	ProductName string    `json:"product_name" db:"product_name"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"` // ← ДОДАТИ!
+	CreatedAt   time.Time `json:"created_at" db:"created_at"` //  +!!
 }

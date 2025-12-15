@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"os"
 	"prac/pkg/repository"
 	"prac/todo"
 	"time"
@@ -12,9 +13,9 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-const (
-	salt      = "afadmfnaddfaohf9-438fhjahfdkhnadjfb"
-	signKey   = "adsbnsvhbdafpskmfpeohnqwpef"
+var (
+	salt      = os.Getenv("SALT")
+	signKey   = os.Getenv("JWT_SECRET")
 	tockenTTL = 12 * time.Hour
 )
 

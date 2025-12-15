@@ -7,7 +7,7 @@ import (
 	"prac/todo"
 )
 
-type Autorization interface {
+type Authorization interface {
 	CreateUser(ctx context.Context, user todo.User) (int, error)
 	GenerateToken(ctx context.Context, email, password string) (string, error)
 	ParseToken(ctx context.Context, token string) (uint, string, error)
@@ -38,7 +38,7 @@ type Order interface {
 }
 
 type Service struct {
-	Autorization
+	Authorization
 	User
 	Product
 	Order
@@ -46,9 +46,9 @@ type Service struct {
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Autorization: NewAuthService(repos.Autorization),
-		User:         NewUserService(repos.User, repos.CacheRepository),
-		Product:      NewProductService(repos.Product, repos.CacheRepository),
-		Order:        NewOrderService(repos.Order),
+		Authorization: NewAuthService(repos.Authorization),
+		User:          NewUserService(repos.User, repos.CacheRepository),
+		Product:       NewProductService(repos.Product, repos.CacheRepository),
+		Order:         NewOrderService(repos.Order),
 	}
 }

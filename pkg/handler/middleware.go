@@ -29,7 +29,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-	userId, userrole, err := h.services.Autorization.ParseToken(ctx, headerParts[1])
+	userId, userrole, err := h.services.Authorization.ParseToken(ctx, headerParts[1])
 	if err != nil {
 		NewErrorResponse(c, 401, err.Error())
 		return

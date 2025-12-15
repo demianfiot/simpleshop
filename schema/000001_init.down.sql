@@ -1,4 +1,4 @@
--- Видаляємо в зворотньому порядку через залежності
+--  в зворотньому порядку через залежності
 DROP TRIGGER IF EXISTS update_orders_updated_at ON orders;
 DROP TRIGGER IF EXISTS update_products_updated_at ON products;
 DROP TRIGGER IF EXISTS update_users_updated_at ON users;
