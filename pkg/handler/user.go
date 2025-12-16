@@ -3,7 +3,6 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"prac/pkg/handler/dto"
 	"prac/todo"
 	"strconv"
 
@@ -11,7 +10,7 @@ import (
 )
 
 func (h *Handler) CreateUser(c *gin.Context) {
-	var input dto.CreateUserInput
+	var input todo.User
 	if err := c.BindJSON(&input); err != nil {
 		NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return

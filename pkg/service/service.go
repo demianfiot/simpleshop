@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"prac/pkg/handler/dto"
 	"prac/pkg/repository"
 	"prac/todo"
 )
@@ -14,7 +13,7 @@ type Authorization interface {
 	GetUserByID(ctx context.Context, userID uint) (todo.User, error)
 }
 type User interface {
-	CreateUser(ctx context.Context, user dto.CreateUserInput) (int, error)
+	CreateUser(ctx context.Context, user todo.User) (int, error)
 	GetAllUsers(ctx context.Context) ([]todo.User, error)
 	GetUserByID(ctx context.Context, userID uint) (todo.User, error)
 	GetUserByEmail(ctx context.Context, email string) (todo.User, error)

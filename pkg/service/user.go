@@ -5,7 +5,6 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"prac/pkg/handler/dto"
 	"prac/pkg/repository"
 	"prac/todo"
 	"time"
@@ -27,7 +26,7 @@ func NewUserService(repo repository.User, cacheRepo repository.CacheRepository) 
 	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, input dto.CreateUserInput) (int, error) {
+func (s *UserService) CreateUser(ctx context.Context, input todo.User) (int, error) {
 	hashedPassword := s.generatePasswordHash(input.PasswordHash)
 
 	user := todo.User{
