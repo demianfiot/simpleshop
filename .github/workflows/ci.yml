@@ -70,12 +70,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /app
-
-            echo "IMAGE_TAG=$IMAGE_TAG"
-            echo "REGISTRY=$REGISTRY"
-            echo "IMAGE_NAME=$IMAGE_NAME"
-
             docker compose pull
-            export IMAGE_FULL="$REGISTRY/$IMAGE_NAME:$IMAGE_TAG"
-            docker compose up -d --remove-orphans
+            docker compose up -d 
+
 
