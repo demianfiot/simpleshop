@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY: demcheek3/gopracrepo
+  REGISTRY: demcheek3
   IMAGE_NAME: go-backend
 
 jobs:
