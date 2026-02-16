@@ -25,14 +25,17 @@ func (h *Handler) CreateProduct(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-	id, err := h.services.Product.CreateProduct(ctx, input, sellerID)
+	product, err := h.services.Product.CreateProduct(ctx, input, sellerID)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id": id,
+		"id":    product.ID,
+		"name":  product.Name,
+		"price": product.Price,
+		"stock": product.Stock,
 	})
 }
 

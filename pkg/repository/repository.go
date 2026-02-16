@@ -31,7 +31,7 @@ type User interface {
 }
 
 type Product interface {
-	CreateProduct(ctx context.Context, product todo.Product) (int, error)
+	CreateProduct(ctx context.Context, product todo.Product) (todo.Product, error)
 	GetAllProducts(ctx context.Context) ([]todo.Product, error)
 	GetProductByID(ctx context.Context, productID uint) (todo.Product, error)
 	UpdateProduct(ctx context.Context, productID uint, product todo.Product) (todo.Product, error)

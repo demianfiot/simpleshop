@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	kafka "github.com/segmentio/kafka-go"
+	"github.com/spf13/viper"
 )
 
 type Producer interface {
@@ -23,9 +24,9 @@ type KafkaProducer struct {
 func NewKafkaProducer(brokers []string) *KafkaProducer {
 	return &KafkaProducer{
 		writer: &kafka.Writer{
-			Addr:     kafka.TCP(brokers...), // pidluchenn9 do brokeriv
-			Topic:    "order_events",        // tema dlya vidpravki povidomlen
-			Balancer: &kafka.LeastBytes{},   // balancer dlya rozpodilu povidomlen
+			Addr:     kafka.TCP(brokers...),                 // pidluchenn9 do brokeriv
+			Topic:    viper.GetString("kafka.topic_orders"), // tema dlya vidpravki povidomlen
+			Balancer: &kafka.LeastBytes{},                   // balancer dlya rozpodilu povidomlen
 		},
 	} // stvorenn9 novogo KafkaProducer
 }

@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"prac/todo"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -18,6 +20,13 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 }
 
 func (r *AuthPostgres) CreateUser(ctx context.Context, user todo.User) (int, error) {
+	log.Printf("ROLE BEFORE INSERT: '%s'", user.Role)
+	user.Role = strings.TrimSpace(user.Role)
+	if user.Role == "" {
+		user.Role = "seller"
+	}
+	log.Printf("ROLE BEFORE INSERT: '%s'", user.Role)
+
 	query := `
 		INSERT INTO users (name, email, password_hash, role)
 		VALUES ($1, $2, $3, $4)

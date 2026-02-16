@@ -17,7 +17,7 @@ func NewProductPostgres(db *sqlx.DB) *ProductPostgres {
 	return &ProductPostgres{db: db}
 }
 
-func (r *ProductPostgres) CreateProduct(ctx context.Context, product todo.Product) (int, error) {
+func (r *ProductPostgres) CreateProduct(ctx context.Context, product todo.Product) (todo.Product, error) {
 	query := `
 	INSERT INTO products (name, description, price, stock, category, seller_id)
 	VALUES ($1, $2, $3, $4, $5, $6)
@@ -34,11 +34,11 @@ func (r *ProductPostgres) CreateProduct(ctx context.Context, product todo.Produc
 	).Scan(&product.ID, &product.CreatedAt)
 	if err != nil {
 		if err.Error() == "duplicate key value violates unique constraint " {
-			return 0, ErrProductAlreadyExists
+			return todo.Product{}, ErrProductAlreadyExists
 		}
-		return 0, fmt.Errorf("failed to create product: %w", err)
+		return todo.Product{}, fmt.Errorf("failed to create product: %w", err)
 	}
-	return int(product.ID), nil
+	return product, nil
 }
 func (r *ProductPostgres) GetAllProducts(ctx context.Context) ([]todo.Product, error) {
 	var products []todo.Product

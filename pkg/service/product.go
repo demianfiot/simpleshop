@@ -34,7 +34,7 @@ func (s *ProductService) productsListCacheKey() string {
 	return "products:list"
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, input todo.CreateProductInput, sellerID uint) (int, error) {
+func (s *ProductService) CreateProduct(ctx context.Context, input todo.CreateProductInput, sellerID uint) (todo.Product, error) {
 	product := todo.Product{
 		Name:        input.Name,
 		Description: input.Description,
