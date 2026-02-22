@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"prac/pkg/repository"
 	"prac/pkg/service/events"
 	"prac/todo"
@@ -9,17 +11,42 @@ import (
 )
 
 type OrderService struct {
-	repo     repository.Order
-	producer events.Producer
+	repo        repository.Order
+	productRepo repository.Product
+	producer    events.Producer
 }
 
-func NewOrderService(repo repository.Order, producer events.Producer) *OrderService {
-	return &OrderService{repo: repo, producer: producer}
+func NewOrderService(repo repository.Order, productRepo repository.Product, producer events.Producer) *OrderService {
+	return &OrderService{repo: repo, productRepo: productRepo, producer: producer}
 }
-func (s *OrderService) CreateOrder(ctx context.Context, userID uint, items []todo.OrderItem) (int, error) {
+func (s *OrderService) CreateOrder(
+	ctx context.Context,
+	userID uint,
+	items []todo.CreateOrderItem,
+) (int, error) {
+
+	var orderItems []todo.OrderItem
 	var total float64
+
 	for _, item := range items {
-		total += item.Price * float64(item.Quantity)
+
+		// товар з бд
+		product, err := s.productRepo.GetProductByID(ctx, item.ProductID)
+		if err != nil {
+			return 0, fmt.Errorf("product %d not found: %w", item.ProductID, err)
+		}
+
+		// ціна тільки з бд
+		price := product.Price
+
+		total += price * float64(item.Quantity)
+
+		orderItems = append(orderItems, todo.OrderItem{
+			ProductID:   product.ID,
+			Quantity:    item.Quantity,
+			Price:       price,
+			ProductName: product.Name,
+		})
 	}
 
 	order := todo.Order{
@@ -28,10 +55,13 @@ func (s *OrderService) CreateOrder(ctx context.Context, userID uint, items []tod
 		Total:  total,
 	}
 
-	orderID, err := s.repo.CreateOrder(ctx, order, items)
+	// Викликаємо репозиторій (транзакція)
+	orderID, err := s.repo.CreateOrder(ctx, order, orderItems)
 	if err != nil {
 		return 0, err
 	}
+
+	// Kafka publish ПІСЛЯ commit
 	event := todo.OrderCreatedEvent{
 		OrderID:   orderID,
 		UserID:    userID,
@@ -40,9 +70,10 @@ func (s *OrderService) CreateOrder(ctx context.Context, userID uint, items []tod
 	}
 
 	if err := s.producer.PublishOrderCreated(ctx, event); err != nil {
-		//
+		log.Printf("failed to publish order created event: %v", err)
 	}
-	return orderID, err
+
+	return orderID, nil
 }
 
 func (s *OrderService) GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error) {

@@ -32,7 +32,7 @@ type Product interface {
 	DeleteProduct(ctx context.Context, id int) error
 }
 type Order interface {
-	CreateOrder(ctx context.Context, userID uint, items []todo.OrderItem) (int, error)
+	CreateOrder(ctx context.Context, userID uint, items []todo.CreateOrderItem) (int, error)
 	GetUserOrders(ctx context.Context, userID uint) ([]todo.Order, error)
 	GetOrderByID(ctx context.Context, orderID uint) (todo.Order, error)
 	UpdateOrderStatus(ctx context.Context, orderID uint, status string) error
@@ -55,6 +55,6 @@ func NewService(repos *repository.Repository) *Service {
 		Authorization: NewAuthService(repos.Authorization),
 		User:          NewUserService(repos.User, repos.CacheRepository),
 		Product:       NewProductService(repos.Product, repos.CacheRepository),
-		Order:         NewOrderService(repos.Order, producer),
+		Order:         NewOrderService(repos.Order, repos.Product, producer),
 	}
 }

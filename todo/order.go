@@ -3,7 +3,7 @@ package todo
 import "time"
 
 type Order struct {
-	ID        uint        `json:"id" gorm:"primaryKey" db:"id"`
+	ID        uint        `json:"id" db:"id"`
 	UserID    uint        `json:"user_id" db:"user_id"`
 	Status    string      `json:"status" db:"status"` // pending, paid, shipped, delivered
 	Total     float64     `json:"total" db:"total"`
@@ -18,4 +18,12 @@ type OrderCreatedEvent struct {
 	UserID    uint      `json:"user_id"`
 	Total     float64   `json:"total"`
 	CreatedAt time.Time `json:"created_at"`
+}
+type CreateOrderInput struct {
+	Items []CreateOrderItem `json:"items" binding:"required,min=1,dive"`
+}
+
+type CreateOrderItem struct {
+	ProductID uint `json:"product_id" binding:"required"`
+	Quantity  int  `json:"quantity" binding:"required,min=1"`
 }

@@ -15,39 +15,23 @@ func (h *Handler) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// DTO  zminyty
-	var input struct {
-		Items []struct {
-			ProductID uint    `json:"product_id" binding:"required"`
-			Quantity  int     `json:"quantity" binding:"required,min=1"`
-			Price     float64 `json:"price" binding:"required,min=0"`
-		} `json:"items" binding:"required,min=1"`
-	}
-
-	if err := c.BindJSON(&input); err != nil {
+	var input todo.CreateOrderInput
+	if err := c.ShouldBindJSON(&input); err != nil {
 		NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// DTO  zminyty
-	var orderItems []todo.OrderItem
-	for _, item := range input.Items {
-		orderItems = append(orderItems, todo.OrderItem{
-			ProductID: item.ProductID,
-			Quantity:  item.Quantity,
-			Price:     item.Price,
-		})
-	}
 	ctx := c.Request.Context()
-	orderID, err := h.services.Order.CreateOrder(ctx, userID, orderItems)
+
+	orderID, err := h.services.Order.CreateOrder(ctx, userID, input.Items)
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{ // 201 Created
+	c.JSON(http.StatusCreated, gin.H{
 		"order_id": orderID,
-		"message":  "Order created successfully",
+		"status":   "pending",
 	})
 }
 
