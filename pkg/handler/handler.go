@@ -51,49 +51,59 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		})
 	})
 
-	// wout auth
 	auth := router.Group("/auth")
 	{
 		auth.POST("/signup", h.SignUp)
 		auth.POST("/signin", h.SignIn)
 	}
 
-	// w/ auth
-	api := router.Group("/api", h.userIdentity)
+	api := router.Group("/api")
+
+	//  PRODUCTS public read
+	products := api.Group("/products")
+	{
+		products.GET("", h.GetAllProducts)
+		products.GET("/:id", h.GetProductByID)
+	}
+
+	// w auth
+
+	protected := api.Group("", h.userIdentity)
 	{
 
-		users := api.Group("/users", h.requireRole("admin"))
-		{
-			users.POST("", h.CreateUser)
-			users.GET("", h.GetAllUsers)
-			users.GET("/:id", h.GetUserByID)
-			// users.GET("/:email", h.GetUserByEmail)
-			users.PATCH("/:id", h.UpdateUser)
-			users.DELETE("/:id", h.DeleteUser)
-		}
-
-		profile := api.Group("/profile")
+		//  profile
+		profile := protected.Group("/profile")
 		{
 			profile.GET("", h.GetProfile)
 			profile.PATCH("", h.UpdateProfile)
 		}
 
-		products := api.Group("/products")
+		//  users (admin only)
+		users := protected.Group("/users", h.requireRole("admin"))
 		{
-			products.POST("", h.requireRole("seller", "admin"), h.CreateProduct)
-			products.GET("", h.GetAllProducts)
-			products.GET("/:id", h.GetProductByID)
-			products.PATCH("/:id", h.requireRole("seller", "admin"), h.UpdateProduct)
-			products.DELETE("/:id", h.requireRole("seller", "admin"), h.DeleteProduct)
+			users.POST("", h.CreateUser)
+			users.GET("", h.GetAllUsers)
+			users.GET("/:id", h.GetUserByID)
+			users.PATCH("/:id", h.UpdateUser)
+			users.DELETE("/:id", h.DeleteUser)
 		}
 
-		orders := api.Group("/orders")
+		// products (seller + admin) - create, update, delete
+		productsProtected := protected.Group("/products")
 		{
-			orders.POST("/", h.CreateOrder)
-			orders.GET("/", h.GetUserOrders)
+			productsProtected.POST("", h.requireRole("seller", "admin"), h.CreateProduct)
+			productsProtected.PATCH("/:id", h.requireRole("seller", "admin"), h.UpdateProduct)
+			productsProtected.DELETE("/:id", h.requireRole("seller", "admin"), h.DeleteProduct)
+		}
+
+		// orders
+		orders := protected.Group("/orders")
+		{
+			orders.POST("", h.CreateOrder)
+			orders.GET("", h.GetUserOrders)
 			orders.GET("/:id", h.GetOrderByID)
-			orders.PATCH("/:id", h.requireRole("admin"), h.UpdateOrderStatus)
 			orders.GET("/all", h.requireRole("admin"), h.GetAllOrders)
+			orders.PATCH("/:id", h.requireRole("admin"), h.UpdateOrderStatus)
 		}
 	}
 
