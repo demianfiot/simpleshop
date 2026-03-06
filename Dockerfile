@@ -11,6 +11,7 @@ FROM alpine:latest
 RUN addgroup -g 1000 -S appuser && adduser -u 1000 -S appuser -G appuser
 WORKDIR /home/appuser/app
 COPY --from=builder --chown=appuser:appuser  /app/main .
+COPY --from=builder --chown=appuser:appuser /app/configs ./configs
 RUN chown -R appuser:appuser /home/appuser
 USER appuser
 EXPOSE 8080

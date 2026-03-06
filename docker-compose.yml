@@ -5,9 +5,12 @@ services:
       dockerfile: Dockerfile
       args:
         APP_VERSION: "1.0.0"
+    env_file:
+      - .env
     image: demian/crm-backend:1.0.0
     container_name: crm-backend  
     environment:
+      CONFIG_PATH: /home/appuser/app/configs/config.yml
       DB_HOST: ${DB_HOST}  
       DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}
@@ -28,8 +31,8 @@ services:
       CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-    ports:
-      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    expose:
+      - "${BACKEND_PORT}"
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,6 +42,19 @@ services:
         condition: service_started
       clickhouse:
         condition: service_started
+    networks:
+      - crm-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crm-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     networks:
       - crm-network
     restart: unless-stopped

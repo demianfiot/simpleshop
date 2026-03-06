@@ -35,7 +35,7 @@ type Product interface {
 	GetAllProducts(ctx context.Context) ([]todo.Product, error)
 	GetProductByID(ctx context.Context, productID uint) (todo.Product, error)
 	UpdateProduct(ctx context.Context, productID uint, product todo.Product) (todo.Product, error)
-	DeleteProduct(ctx context.Context, id int) error
+	DeleteProduct(ctx context.Context, id uint) error
 }
 type Order interface {
 	CreateOrder(ctx context.Context, order todo.Order, items []todo.OrderItem) (int, error)

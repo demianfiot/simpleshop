@@ -51,7 +51,64 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		})
 	})
 
-	auth := router.Group("/auth")
+	api := router.Group("/api")
+	{
+		// ---------- AUTH ----------
+		auth := api.Group("/auth")
+		{
+			auth.POST("/signup", h.SignUp)
+			auth.POST("/signin", h.SignIn)
+		}
+		// ---------- PUBLIC PRODUCTS ----------
+		products := api.Group("/products")
+		{
+			products.GET("", h.GetAllProducts)
+			products.GET("/:id", h.GetProductByID)
+		}
+
+		// ---------- PROTECTED ROUTES ----------
+		protected := api.Group("", h.userIdentity)
+		{
+			// ----- PROFILE -----
+			profile := protected.Group("/profile")
+			{
+				profile.GET("", h.GetProfile)
+				profile.PATCH("", h.UpdateProfile)
+			}
+
+			// ----- USERS (admin only) -----
+			users := protected.Group("/users")
+			{
+				users.POST("", h.requireRole("admin"), h.CreateUser)
+				users.GET("", h.requireRole("admin"), h.GetAllUsers)
+				users.GET("/:id", h.requireRole("admin"), h.GetUserByID)
+				users.PATCH("/:id", h.requireRole("admin"), h.UpdateUser)
+				users.DELETE("/:id", h.requireRole("admin"), h.DeleteUser)
+			}
+
+			// ----- PRODUCTS (seller + admin) -----
+			productsProtected := protected.Group("/products")
+			{
+				productsProtected.POST("", h.requireRole("seller", "admin"), h.CreateProduct)
+				productsProtected.PATCH("/:id", h.requireRole("seller", "admin"), h.UpdateProduct)
+				productsProtected.DELETE("/:id", h.requireRole("seller", "admin"), h.DeleteProduct)
+			}
+
+			// ----- ORDERS -----
+			orders := protected.Group("/orders")
+			{
+				orders.POST("", h.CreateOrder)
+				orders.GET("", h.GetUserOrders)
+				orders.GET("/:id", h.GetOrderByID)
+				orders.GET("/all", h.requireRole("admin"), h.GetAllOrders)
+				orders.PATCH("/:id", h.requireRole("admin"), h.UpdateOrderStatus)
+			}
+		}
+	}
+	return router
+}
+
+/* auth := router.Group("/auth")
 	{
 		auth.POST("/signup", h.SignUp)
 		auth.POST("/signin", h.SignIn)
@@ -59,7 +116,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api")
 
-	//  PRODUCTS public read
+	//  products public read
 	products := api.Group("/products")
 	{
 		products.GET("", h.GetAllProducts)
@@ -108,4 +165,4 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	}
 
 	return router
-}
+} */

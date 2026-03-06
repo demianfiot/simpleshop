@@ -44,30 +44,39 @@ func (s *ProductService) CreateProduct(ctx context.Context, input todo.CreatePro
 		SellerID:    sellerID,
 	}
 
-	return s.repo.CreateProduct(ctx, product)
+	createdProduct, err := s.repo.CreateProduct(ctx, product)
+	if err != nil {
+		return todo.Product{}, err
+	}
+
+	listKey := s.productsListCacheKey()
+	_ = s.cacheRepo.Delete(ctx, listKey)
+
+	return createdProduct, nil
 }
 
 func (s *ProductService) GetAllProducts(ctx context.Context) ([]todo.Product, error) {
 	cacheKey := s.productsListCacheKey()
 
-	// cache
+	// 1️⃣ пробуємо з кешу
 	cachedData, err := s.cacheRepo.Get(ctx, cacheKey)
 	if err == nil && cachedData != nil {
 		var products []todo.Product
 		if err := json.Unmarshal(cachedData, &products); err == nil {
 			return products, nil
 		}
-		return products, nil
 	}
 
-	//db
+	// 2️⃣ якщо нема в кеші — беремо з БД
 	products, err := s.repo.GetAllProducts(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	// 3️⃣ кладемо в кеш
 	if len(products) > 0 {
-		s.cacheRepo.Set(ctx, cacheKey, products, s.listCacheTTL)
+		data, _ := json.Marshal(products)
+		_ = s.cacheRepo.Set(ctx, cacheKey, data, s.listCacheTTL)
 	}
 
 	return products, nil
@@ -75,12 +84,13 @@ func (s *ProductService) GetAllProducts(ctx context.Context) ([]todo.Product, er
 
 func (s *ProductService) GetProductByID(ctx context.Context, productID uint) (todo.Product, error) {
 	cacheKey := s.productCacheKey(productID)
-	// cache
+
 	cachedData, err := s.cacheRepo.Get(ctx, cacheKey)
 	if err == nil && cachedData != nil {
 		var product todo.Product
-		json.Unmarshal(cachedData, &product)
-		return product, nil
+		if err := json.Unmarshal(cachedData, &product); err == nil {
+			return product, nil
+		}
 	}
 
 	product, err := s.repo.GetProductByID(ctx, productID)
@@ -88,12 +98,18 @@ func (s *ProductService) GetProductByID(ctx context.Context, productID uint) (to
 		return todo.Product{}, err
 	}
 
-	s.cacheRepo.Set(ctx, cacheKey, product, s.cacheTTL)
+	data, _ := json.Marshal(product)
+	_ = s.cacheRepo.Set(ctx, cacheKey, data, s.cacheTTL)
 
 	return product, nil
-
 }
-func (s *ProductService) UpdateProduct(ctx context.Context, productID uint, input todo.UpdateProductInput, sellerID uint) (todo.Product, error) {
+func (s *ProductService) UpdateProduct(
+	ctx context.Context,
+	productID uint,
+	input todo.UpdateProductInput,
+	sellerID uint,
+) (todo.Product, error) {
+
 	product := todo.Product{
 		Name:        input.Name,
 		Description: input.Description,
@@ -103,8 +119,33 @@ func (s *ProductService) UpdateProduct(ctx context.Context, productID uint, inpu
 		SellerID:    sellerID,
 	}
 
-	return s.repo.UpdateProduct(ctx, productID, product)
+	updatedProduct, err := s.repo.UpdateProduct(ctx, productID, product)
+	if err != nil {
+		return todo.Product{}, err
+	}
+
+	// 🔥 інвалідовуємо кеш конкретного продукту
+	productKey := s.productCacheKey(productID)
+	_ = s.cacheRepo.Delete(ctx, productKey)
+
+	// 🔥 інвалідовуємо список
+	listKey := s.productsListCacheKey()
+	_ = s.cacheRepo.Delete(ctx, listKey)
+
+	return updatedProduct, nil
 }
-func (s *ProductService) DeleteProduct(ctx context.Context, id int) error {
-	return s.repo.DeleteProduct(ctx, id)
+func (s *ProductService) DeleteProduct(ctx context.Context, id uint) error {
+	if err := s.repo.DeleteProduct(ctx, id); err != nil {
+		return err
+	}
+
+	// 🔥 чистимо кеш продукту
+	productKey := s.productCacheKey(id)
+	_ = s.cacheRepo.Delete(ctx, productKey)
+
+	// 🔥 чистимо кеш списку
+	listKey := s.productsListCacheKey()
+	_ = s.cacheRepo.Delete(ctx, listKey)
+
+	return nil
 }

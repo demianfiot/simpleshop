@@ -7,7 +7,6 @@ import (
 	"prac/pkg/repository"
 	"prac/pkg/service"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -30,9 +29,9 @@ func main() {
 		logrus.Fatalf("error initializating configs: %s", err.Error())
 	}
 
-	if err := godotenv.Load(); err != nil {
-		logrus.Fatalf("error loading env variables: %s", err.Error())
-	}
+	// if err := godotenv.Load(); err != nil {
+	// 	logrus.Fatalf("error loading env variables: %s", err.Error())
+	// }
 
 	redisConfig := config.RedisConfigFromViper()
 	redisClient := config.NewRedisClient(redisConfig)
@@ -55,9 +54,10 @@ func main() {
 }
 
 func initConfig() error {
-	viper.AddConfigPath("configs")
 	viper.SetConfigName("config")
-	viper.SetDefault("redis.host", "localhost")
+	viper.SetConfigType("yml")
+	viper.AddConfigPath("./configs")
+	viper.SetDefault("redis.host", "redis")
 	viper.SetDefault("redis.port", "6379")
 	viper.SetDefault("redis.db", 0)
 	return viper.ReadInConfig()

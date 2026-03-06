@@ -95,7 +95,7 @@ func (r *ProductPostgres) UpdateProduct(ctx context.Context, productID uint, pro
 
 	return updatedProduct, nil
 }
-func (r *ProductPostgres) DeleteProduct(ctx context.Context, id int) error {
+func (r *ProductPostgres) DeleteProduct(ctx context.Context, id uint) error {
 	query := `DELETE FROM products WHERE id = $1`
 	result, err := r.db.Exec(query, id)
 	if err != nil {

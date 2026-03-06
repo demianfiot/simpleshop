@@ -138,7 +138,7 @@ func (h *Handler) DeleteProduct(c *gin.Context) {
 		return
 	}
 	ctx = c.Request.Context()
-	err = h.services.Product.DeleteProduct(ctx, productID)
+	err = h.services.Product.DeleteProduct(ctx, uint(productID))
 	if err != nil {
 		NewErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
