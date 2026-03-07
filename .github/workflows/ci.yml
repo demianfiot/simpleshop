@@ -68,8 +68,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /app
-            docker-compose pull
-            docker-compose up -d 
+            cd /app/simpleshop
+            docker compose pull
+            docker compose up -d --build
 
 
