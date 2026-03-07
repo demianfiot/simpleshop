@@ -69,7 +69,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd /home/ubuntu/app/simpleshop
-            docker compose pull
-            docker compose up -d --build
+            sudo docker compose pull
+            sudo docker compose up -d --build
 
 
