@@ -20,15 +20,14 @@ const ProductsList = ({ products, onDelete, onEdit, onAddToCart }) => {
             {/* {product.stock === 0 && (
               <Badge variant="danger">Out of stock</Badge>
             )} */}
-          {product.seller_id !== currentUser?.id ? (
-              <AddToCartButton
-                onClick={() => {
-                  console.log("CLICK WORKS");
-                  onAddToCart(product);
-                }}
-              >
-                Add to Cart
-              </AddToCartButton>
+          {Number(product.seller_id) !== Number(currentUser?.id) ? (
+            <AddToCartButton
+              onClick={() => {
+                onAddToCart(product);
+              }}
+            >
+              Add to Cart
+            </AddToCartButton>
           ) : (
             <Actions>
               <EditButton onClick={() => onEdit(product)}>Edit</EditButton>

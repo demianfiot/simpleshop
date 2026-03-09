@@ -16,11 +16,16 @@ export const useAuth = () => {
     return await login(data.email, data.password);
   };
 
-const login = async (email, password) => {
-  const { token, user } = await loginUser({ email, password });
-  localStorage.setItem("token", token);
-  setCurrentUser(user);
-};
+  const login = (token) => {
+    localStorage.setItem("token", token);
+
+    const decoded = jwtDecode(token);
+
+    setCurrentUser({
+      id: decoded.user_id,
+      role: decoded.role,
+    });
+  };
 
   const logout = () => {
     localStorage.removeItem("token");

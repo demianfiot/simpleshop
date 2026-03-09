@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useProducts } from "../hooks/useProducts";
 import { useCart } from "../hooks/useCart";
 import { useAuth } from "../context/AuthContext";
+import { useProfile } from "../hooks/useProfile";
 import Header from "../Header";
 import ProductsList from "../components/Products/ProductsList";
 import AddProduct from "../components/Products/AddProduct";
@@ -16,11 +17,15 @@ const Dashboard = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [search, setSearch] = useState("");
 
-  // завантажуємо продукти після завантаження профілю
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []);
 
+  useEffect(() => {
+    if (currentUser) {
+      fetchProducts();
+    }
+  }, [currentUser]);
   const handleSubmit = async (data) => {
     if (editingProduct) {
       await editProduct(editingProduct.id, data);

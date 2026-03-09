@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import  AuthUser  from "../components/AuthUser";
 import { registerUser, loginUser } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
-  const navigate = useNavigate();
   const { login } = useAuth(); // беремо login з контексту
 
   const handleSubmit = async (data) => {
@@ -33,10 +31,10 @@ const AuthPage = () => {
       }
 
       // Оновлюємо стан в AuthContext
-      login(token, user);
+      login(token);
 
       // 3Редірект після логіну
-      navigate("/"); //main
+      window.location.href = "/";
     } catch (err) {
       console.error("Auth failed", err);
       alert("Authentication failed");

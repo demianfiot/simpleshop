@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useProfile } from "./hooks/useProfile";
 import { CiUser } from "react-icons/ci";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const { profile, logout } = useProfile();
@@ -10,7 +11,7 @@ const Header = () => {
     <StyledHeader>
       <h1>Demian ba3ar</h1>
 
-      {profile && (
+      {profile ? (
         <div className="profile">
           {profile.avatar ? (
             <img
@@ -31,6 +32,10 @@ const Header = () => {
             Logout
           </button>
         </div>
+      ) : (
+      <Link to="/auth">
+          <button className="login-btn">Login</button>
+      </Link>
       )}
     </StyledHeader>
   );
@@ -109,4 +114,18 @@ const StyledHeader = styled.header`
       }
     }
   }
+    .login-btn {
+      margin-left: 12px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #10b981;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+
+      &:hover {
+        background-color: #059669;
+      }
+    }
 `;
