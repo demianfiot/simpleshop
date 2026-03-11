@@ -80,5 +80,5 @@ jobs:
 
             export IMAGE_TAG=${{ needs.build.outputs.image_tag }}
 
-            sudo docker compose pull
-            sudo docker compose up -d
+            sudo -E docker compose pull
+            sudo -E docker compose up -d
