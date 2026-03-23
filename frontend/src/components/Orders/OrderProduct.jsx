@@ -25,6 +25,7 @@ const OrderProduct = ({ cart, removeFromCart, clearCart }) => {
 
       clearCart();
       alert("Order created successfully");
+      navigate("/"); // оновлення 
     } catch (err) {
       console.error("Order failed", err);
       alert("Order failed");
@@ -107,7 +108,7 @@ const CheckoutButton = styled.button`
   width: 100%;
   padding: 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #22c55e;
   color: white;
   cursor: pointer;

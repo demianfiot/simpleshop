@@ -119,9 +119,15 @@ const AddProduct = ({ onSubmit, editingProduct, clearEditing }) => {
           </div>
 
           <button type="submit">
-            {isEdit ? "Update Product" : "Add your product"}
+            {isEdit ? "Update Product" : "Add product"}
           </button>
-
+          <button
+            type="button"
+            onClick={clearEditing}
+            className="cancel-btn"
+          >
+            Back to filters
+          </button>
           {isEdit && (
             <button
               type="button"
@@ -139,7 +145,7 @@ const AddProduct = ({ onSubmit, editingProduct, clearEditing }) => {
 
 const StyledWrapper = styled.div`
   .form-box {
-    max-width: 100%;        /* замість 300px */
+    max-width: 100%;        
     background: #f1f7fe;
     color: #010101;
     padding: 0;
@@ -157,7 +163,7 @@ const StyledWrapper = styled.div`
   /* Form text */
   .title {
     font-weight: bold;
-    font-size: 1.5rem;   /* трохи компактніше */
+    font-size: 1.5rem;  
   }
 
   /* Inputs box */
@@ -172,7 +178,7 @@ const StyledWrapper = styled.div`
     background: none;
     border: 0;
     outline: 0;
-    height: 38px;        /* трохи компактніше */
+    height: 38px;        
     width: 100%;
     border-bottom: 1px solid #eee;
     font-size: .9rem;
@@ -183,7 +189,7 @@ const StyledWrapper = styled.div`
     background-color: #1f78ff;
     color: #fff;
     border: 0;
-    border-radius: 24px;
+    border-radius: 12px;
     padding: 9px 14px;
     font-size: 0.95rem;
     font-weight: 600;
@@ -193,6 +199,14 @@ const StyledWrapper = styled.div`
 
   .form button:hover {
     background-color: #4f95ff;
+  }
+  .cancel-btn {
+    margin-top: 10px;
+    background: #ccc !important;
+    color: #333;
+}
+  .cancel-btn:hover {
+    background-color: #222222;
   }
 `;
 export default AddProduct;

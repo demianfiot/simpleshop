@@ -8,15 +8,19 @@ import ProductsList from "../components/Products/ProductsList";
 import AddProduct from "../components/Products/AddProduct";
 import OrderProduct from "../components/Orders/OrderProduct";
 import styled from "styled-components";
+import Filters from "../components/Filters";
 
 const Dashboard = () => {
   const { currentUser } = useAuth(); 
   const { products, fetchProducts, addProduct, editProduct, removeProduct } = useProducts();
   const { cart, addToCart, removeFromCart, clearCart } = useCart();
-
+  const [mode, setMode] = useState("filters");
   const [editingProduct, setEditingProduct] = useState(null);
   const [search, setSearch] = useState("");
-
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [category, setCategory] = useState("");
+  
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -32,6 +36,7 @@ const Dashboard = () => {
       setEditingProduct(null);
     } else {
       await addProduct(data);
+      setMode("filters");
     }
     // fetchProducts викликається всередині hook після add/edit
   };
@@ -41,24 +46,53 @@ const Dashboard = () => {
     // fetchProducts викликається всередині hook → список синхронний
   };
 
-  const filteredProducts = useMemo(() => {
-    if (!products) return [];
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [products, search]);
+const filteredProducts = useMemo(() => {
+  if (!products) return [];
 
+  return products
+    .filter((p) =>
+      p.name.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((p) =>
+      minPrice ? p.price >= Number(minPrice) : true
+    )
+    .filter((p) =>
+      maxPrice ? p.price <= Number(maxPrice) : true
+    )
+    .filter((p) =>
+      category
+        ? p.category.toLowerCase().includes(category.toLowerCase())
+        : true
+    );
+}, [products, search, minPrice, maxPrice, category]);
+
+  
   return (
     <StyledWrapper>
       <Header />
 
       <div className="dashboard">
         <div className="left">
-          <AddProduct
-            onSubmit={handleSubmit}
-            editingProduct={editingProduct}
-            clearEditing={() => setEditingProduct(null)}
-          />
+          {mode === "filters" ? (
+            <Filters
+              minPrice={minPrice}
+              setMinPrice={setMinPrice}
+              maxPrice={maxPrice}
+              setMaxPrice={setMaxPrice}
+              category={category}
+              setCategory={setCategory}
+              onCreateClick={() => setMode("create")}
+            />
+          ) : (
+            <AddProduct
+              onSubmit={handleSubmit}
+              editingProduct={editingProduct}
+              clearEditing={() => {
+                setEditingProduct(null);
+                setMode("filters"); // повернення назад
+              }}
+            />
+          )}
 
           <OrderProduct
             cart={cart}
@@ -78,7 +112,10 @@ const Dashboard = () => {
           <ProductsList
             products={filteredProducts}
             onDelete={handleDelete}
-            onEdit={(product) => setEditingProduct(product)}
+            onEdit={(product) => {
+              setEditingProduct(product);
+              setMode("create");
+            }}
             onAddToCart={addToCart}
           />
         </div>
@@ -92,11 +129,10 @@ const Dashboard = () => {
 const StyledWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 
   .dashboard {
     display: flex;
-    margin-top: 80px;
+    margin-top: 70px;
     min-height: calc(100vh - 80px);
   }
 
@@ -119,7 +155,7 @@ const StyledWrapper = styled.div`
   }
 `;
 const SearchInput = styled.input`
-  width: 1455px;
+  width: 1380px;
   background-color: #f5f5f5;
   color: #242424;
   padding: .15rem .5rem;

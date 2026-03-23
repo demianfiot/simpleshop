@@ -1,122 +1,326 @@
 import styled from "styled-components";
 import { useAuth } from "../../context/AuthContext";
+import { useState } from "react";
+
 
 const ProductsList = ({ products, onDelete, onEdit, onAddToCart }) => {
   const { currentUser } = useAuth();
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  if (products.length === 0) {
+  if (!products || products.length === 0) {
     return <p>No products available</p>;
   }
 
   return (
-    <Grid>
-      {products.map((product) => (
-        <Card key={product.id} outOfStock={product.stock === 0}>
-          <h3>{product.name}</h3>
-          <p>Description: {product.description}</p>
-          <p>Category: {product.category}</p>
-          <p>Price: ${product.price}</p>
-          <p>Stock: {product.stock}</p>
-            {/* {product.stock === 0 && (
-              <Badge variant="danger">Out of stock</Badge>
-            )} */}
-          {Number(product.seller_id) !== Number(currentUser?.id) ? (
-            <AddToCartButton
-              onClick={() => {
-                onAddToCart(product);
-              }}
+    <>
+      <Grid>
+        {products.map((product) => {
+          const isOwner =
+            Number(product.seller_id) === Number(currentUser?.id);
+          const isOutOfStock = product.stock === 0;
+
+          return (
+            <Card
+              key={product.id}
+              onClick={() => setSelectedProduct(product)}
+              outOfStock={isOutOfStock}
             >
-              Add to Cart
-            </AddToCartButton>
-          ) : (
-            <Actions>
-              <EditButton onClick={() => onEdit(product)}>Edit</EditButton>
-              <DeleteButton onClick={() => onDelete(product.id)}>Delete</DeleteButton>
-            </Actions>
-          )}
-        </Card>
-      ))}
-    </Grid>
+              <FakeImage>📦</FakeImage>
+              <InfoContainer>
+                <h2>{product.name}</h2>
+                <Category>{product.category}</Category>
+                <Price>${product.price}</Price>
+              </InfoContainer>
+
+              {isOutOfStock && !isOwner && <OutOfStock>Out of stock</OutOfStock>}
+
+              {/* 🔹 OWNER кнопки */}
+              {isOwner ? (
+                <ActionsRow>
+                  <EditButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(product);
+                    }}
+                  >
+                    Edit
+                  </EditButton>
+
+                  <DeleteButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(product.id);
+                    }}
+                  >
+                    Delete
+                  </DeleteButton>
+                </ActionsRow>
+              ) : (
+                !isOutOfStock && (
+                  <AddToCartButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddToCart(product);
+                    }}
+                  >
+                    Add to Cart
+                  </AddToCartButton>
+                )
+              )}
+            </Card>
+          );
+        })}
+      </Grid>
+
+      {/* 🔥 MODAL */}
+      {selectedProduct && (
+        <Overlay onClick={() => setSelectedProduct(null)}>
+          <Modal onClick={(e) => e.stopPropagation()}>
+            <ModalImage>
+              <FakeImageBig>📦</FakeImageBig>
+            </ModalImage>
+            <ModalContent>
+              <div className="info">
+                <h2>{selectedProduct.name}</h2>
+                <p><b>Category:</b> {selectedProduct.category}</p>
+                <p><b>Description:</b> {selectedProduct.description}</p>
+                <p><b>Price:</b> ${selectedProduct.price}</p>
+                <p><b>Stock:</b> {selectedProduct.stock}</p>
+
+                {selectedProduct.stock === 0 && (
+                  <OutOfStock>Out of stock</OutOfStock>
+                )}
+
+                {Number(selectedProduct.seller_id) === Number(currentUser?.id) ? (
+                  <ActionsRow>
+                    <EditButton
+                      onClick={() => {
+                        onEdit(selectedProduct);
+                        setSelectedProduct(null);
+                      }}
+                    >
+                      Edit
+                    </EditButton>
+
+                    <DeleteButton
+                      onClick={() => {
+                        onDelete(selectedProduct.id);
+                        setSelectedProduct(null);
+                      }}
+                    >
+                      Delete
+                    </DeleteButton>
+                  </ActionsRow>
+                ) : selectedProduct.stock > 0 ? (
+                  <AddToCartButton
+                    onClick={() => {
+                      onAddToCart(selectedProduct);
+                      setSelectedProduct(null);
+                    }}
+                  >
+                    Add to Cart
+                  </AddToCartButton>
+                ) : null}
+              </div>
+            </ModalContent>
+
+            <CloseButton onClick={() => setSelectedProduct(null)}>
+              Close
+            </CloseButton>
+          </Modal>
+        </Overlay>
+      )}
+    </>
   );
 };
 
 export default ProductsList;
 
+//
+// 🎨 STYLES
+//
+
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 15px;
-  margin: 0 0 0 10px ;
+  padding: 10px;
 `;
 
 const Card = styled.div`
   background: white;
   padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-
-  opacity: ${(props) => (props.$outOfStock ? 0.6 : 1)};
-  transition: transform 0.1s ease, opacity 0.2s ease;
-
-  &:hover {
-    transform: ${(props) =>
-      props.$outOfStock ? "none" : "translateY(-1px)"};
-  }
-`;
-
-const Actions = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-`;
-
-const Button = styled.button`
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
-  color: white;
-`;
+  text-align: left;
 
-const EditButton = styled(Button)`
-  background-color: #6fa6ff;
+  opacity: ${(p) => (p.outOfStock ? 0.6 : 1)};
+  transition: 0.2s;
 
   &:hover {
-    background-color: #2563eb;
+    transform: translateY(-3px);
   }
 `;
 
-const DeleteButton = styled(Button)`
-  background-color: #fd8484;
-
-  &:hover {
-    background-color: #dc2626;
-  }
+const FakeImage = styled.div`
+  font-size: 70px;
+  margin-bottom: 10px;
+  text-align: center;
 `;
 
-const AddToCartButton = styled(Button)`
+const FakeImageBig = styled.div`
+  font-size: 180px;
+  line-height: 1;
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-  background-color: #10b981;
+  align-items: center;
+  justify-content: center;
+`;
 
-  &:hover {
-    background-color: #059669;
+const InfoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  
+  h2 {
+    margin: 0;
+    font-size: 18px;
   }
 `;
 
-// const Badge = styled.span`
-//   display: inline-block;
-//   padding: 4px 8px;
-//   border-radius: 6px;
-//   font-size: 12px;
-//   font-weight: 600;
-//   margin-top: 6px;
+const Category = styled.div`
+  font-size: 13px;
+  color: #777;
+  margin: 0;
+`;
 
-//   background-color: ${(props) =>
-//     props.variant === "danger" ? "#fee2e2" : "#dcfce7"};
+const Price = styled.div`
+  font-weight: bold;
+  font-size: 18px;
+  color: #1f78ff;
+  margin: 0;
+`;
 
-//   color: ${(props) =>
-//     props.variant === "danger" ? "#dc2626" : "#16a34a"};
-// `;
+const OutOfStock = styled.div`
+  margin-top: 8px;
+  color: #ef4444;
+  font-weight: bold;
+`;
+
+//
+// 🔹 BUTTONS
+//
+
+const ActionsRow = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+`;
+
+const BaseButton = styled.button`
+  height: 34px;
+  padding: 0 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+/* 🔹 повна кнопка */
+const FullButton = styled(BaseButton)`
+  width: 100%;
+`;
+
+const AddToCartButton = styled(FullButton)`
+  background: #10b981;
+  color: white;
+
+  &:hover {
+    background: #059669;
+  }
+`;
+
+const HalfButton = styled(BaseButton)`
+  flex: 1;
+`;
+
+/* 🔹 EDIT */
+const EditButton = styled(HalfButton)`
+  background: #3b82f6;
+  color: white;
+
+  &:hover {
+    background: #2563eb;
+  }
+`;
+
+
+/* 🔹 DELETE */
+const DeleteButton = styled(HalfButton)`
+  background: #ef4444;
+  color: white;
+
+  &:hover {
+    background: #dc2626;
+  }
+`;
+
+//
+// 🔹 MODAL
+//
+
+const Overlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const ModalImage = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  width: auto;
+  height: auto;
+  max-width: 220px;
+  max-height: 220px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const Modal = styled.div`
+  position: relative; 
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 600px;
+  min-height: 300px;
+`;
+
+const ModalContent = styled.div`
+  display: block;
+
+  .info {
+    width: 100%;
+    padding-right: 220px;
+  }
+`;
+/* 🔹 close кнопка (та сама база) */
+const CloseButton = styled(FullButton)`
+  margin-top: 15px;
+  background: #ccc;
+  color: black;
+
+  &:hover {
+    background: #bfbfbf;
+  }
+`;
