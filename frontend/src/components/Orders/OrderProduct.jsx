@@ -25,7 +25,7 @@ const OrderProduct = ({ cart, removeFromCart, clearCart }) => {
 
       clearCart();
       alert("Order created successfully");
-      navigate("/"); // оновлення 
+      window.location.href = "/";
     } catch (err) {
       console.error("Order failed", err);
       alert("Order failed");

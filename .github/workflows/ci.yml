@@ -81,4 +81,5 @@ jobs:
             export IMAGE_TAG=${{ needs.build.outputs.image_tag }}
 
             sudo -E docker compose pull
-            sudo -E docker compose up -d
+            sudo -E docker compose up -d --remove-orphans
+            sudo docker image prune -af
