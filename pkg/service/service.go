@@ -11,7 +11,7 @@ import (
 
 type Authorization interface {
 	CreateUser(ctx context.Context, user todo.User) (int, error)
-	GenerateToken(ctx context.Context, email, password string) (string, error)
+	GenerateToken(ctx context.Context, email, password string) (string, todo.User, error)
 	ParseToken(ctx context.Context, token string) (uint, string, error)
 	GetUserByID(ctx context.Context, userID uint) (todo.User, error)
 }

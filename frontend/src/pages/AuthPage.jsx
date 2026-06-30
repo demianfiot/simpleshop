@@ -1,43 +1,30 @@
 import { useState } from "react";
-import  AuthUser  from "../components/AuthUser";
+import AuthForm from "../components/auth/AuthForm";
 import { registerUser, loginUser } from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
+import { showToast } from "../components/ui/Toast";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
-  const { login } = useAuth(); // беремо login з контексту
+  const { login } = useAuth();
 
   const handleSubmit = async (data) => {
     try {
-      let token, user;
-
       if (mode === "register") {
-        //  Реєстрація
         await registerUser(data);
-
-        //  Авто-логін після реєстрації
         const res = await loginUser({
           email: data.email,
           password: data.password,
         });
-
-        token = res.token;
-        user = res.user;
+        login(res.token, res.user);
       } else {
-        // LOGIN
         const res = await loginUser(data);
-        token = res.token;
-        user = res.user;
+        login(res.token, res.user);
       }
-
-      // Оновлюємо стан в AuthContext
-      login(token);
-
-      // 3Редірект після логіну
       window.location.href = "/";
     } catch (err) {
       console.error("Auth failed", err);
-      alert("Authentication failed");
+      showToast("Authentication failed. Check your credentials.", "error");
     }
   };
 
@@ -46,11 +33,7 @@ const AuthPage = () => {
   };
 
   return (
-    <AuthUser
-      mode={mode}
-      onSubmit={handleSubmit}
-      switchMode={switchMode}
-    />
+    <AuthForm mode={mode} onSubmit={handleSubmit} switchMode={switchMode} />
   );
 };
 

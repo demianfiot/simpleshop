@@ -8,7 +8,7 @@ export
 migrate-up:
 	docker run --rm \
 		-v $(PWD)/schema:/schema \
-		--network gptprac3_crm-network \
+		--network simpleshop_crm-network \
 		migrate/migrate \
 		-path=/schema \
 		-database 'postgres://$(DB_USER):$(DB_PASSWORD)@postgres:5432/$(DB_NAME)?sslmode=disable' \
@@ -17,7 +17,7 @@ migrate-up:
 migrate-down:
 	docker run --rm \
 		-v $(PWD)/schema:/schema \
-		--network gptprac3_crm-network \
+		--network simpleshop_crm-network \
 		migrate/migrate \
 		-path=/schema \
 		-database 'postgres://$(DB_USER):$(DB_PASSWORD)@postgres:5432/$(DB_NAME)?sslmode=disable' \

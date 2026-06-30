@@ -35,10 +35,10 @@ func (s *AuthService) CreateUser(ctx context.Context, user todo.User) (int, erro
 	user.PasswordHash = s.generatePasswordHash(user.PasswordHash)
 	return s.repo.CreateUser(ctx, user)
 }
-func (s *AuthService) GenerateToken(ctx context.Context, email, password string) (string, error) {
+func (s *AuthService) GenerateToken(ctx context.Context, email, password string) (string, todo.User, error) {
 	user, err := s.repo.GetUser(ctx, email, s.generatePasswordHash(password))
 	if err != nil {
-		return "", err
+		return "", todo.User{}, err
 	}
 	tocken := jwt.NewWithClaims(jwt.SigningMethodHS256, &tockenClaims{
 		jwt.StandardClaims{
@@ -46,7 +46,11 @@ func (s *AuthService) GenerateToken(ctx context.Context, email, password string)
 			IssuedAt:  time.Now().Unix(),
 		}, user.ID,
 	})
-	return tocken.SignedString([]byte(signKey))
+	tokenString, err := tocken.SignedString([]byte(signKey))
+	if err != nil {
+		return "", todo.User{}, err
+	}
+	return tokenString, user, nil
 }
 func (s *AuthService) ParseToken(ctx context.Context, acessToken string) (uint, string, error) {
 	token, err := jwt.ParseWithClaims(acessToken, &tockenClaims{}, func(tkn *jwt.Token) (interface{}, error) {

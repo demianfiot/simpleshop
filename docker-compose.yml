@@ -11,7 +11,7 @@ services:
     container_name: crm-backend  
     environment:
       CONFIG_PATH: /home/appuser/app/configs/config.yml
-      DB_HOST: ${DB_HOST}  
+      DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -20,8 +20,6 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
 
-      BACKEND_PORT: ${BACKEND_PORT} 
-      
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
       KAFKA_TOPIC_ORDERS: ${KAFKA_TOPIC_ORDERS}
       KAFKA_GROUP_ID: ${KAFKA_GROUP_ID}
@@ -31,13 +29,13 @@ services:
       CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-    expose:
-      - "${BACKEND_PORT}"
+    ports:
+      - "${BACKEND_PORT}:8080"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       kafka:
         condition: service_started
       clickhouse:
@@ -89,6 +87,12 @@ services:
       - redis_data:/data
     ports:
       - "${REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     networks:
       - crm-network
     restart: unless-stopped
@@ -111,9 +115,9 @@ services:
       - --kafka-addr
       - PLAINTEXT://0.0.0.0:9092
       - --advertise-kafka-addr
-      - PLAINTEXT://${KAFKA_ADVERTISED_HOST}:${KAFKA_PORT}
+      - PLAINTEXT://${KAFKA_ADVERTISED_HOST}:9092
     ports:
-      - "${KAFKA_PORT}:${KAFKA_PORT}"
+      - "9092:9092"
     networks:
       - crm-network
     restart: unless-stopped
@@ -127,7 +131,7 @@ services:
       CLICKHOUSE_DB: ${CLICKHOUSE_DATABASE}
     ports:
       - "8123:8123"
-      - "${CLICKHOUSE_PORT}:${CLICKHOUSE_PORT}"
+      - "${CLICKHOUSE_PORT}:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     networks:
@@ -143,5 +147,3 @@ volumes:
 networks:
   crm-network:
     driver: bridge
-
-

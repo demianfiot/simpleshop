@@ -29,7 +29,16 @@ export const AuthProvider = ({ children }) => {
 
   const login = (token, user) => {
     localStorage.setItem("token", token);
-    setCurrentUser(user);
+    if (user) {
+      setCurrentUser(user);
+    } else {
+      try {
+        const decoded = jwtDecode(token);
+        setCurrentUser({ id: decoded.user_id, role: decoded.role });
+      } catch (err) {
+        console.error("Invalid token");
+      }
+    }
   };
 
   const logout = () => {

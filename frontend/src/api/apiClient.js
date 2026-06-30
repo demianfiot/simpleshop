@@ -1,9 +1,6 @@
 const BASE_URL = "/api";
 
 export const apiFetch = async (url, options = {}) => {
-  console.log("BASE:", BASE_URL);
-  console.log("URL ARG:", url);
-  console.log("FINAL:", `${BASE_URL}${url}`);
   const token = localStorage.getItem("token");
 
   const headers = {
@@ -19,13 +16,13 @@ export const apiFetch = async (url, options = {}) => {
 
   if (res.status === 401) {
     localStorage.removeItem("token");
-
     window.location.href = "/auth";
     return;
   }
 
   if (!res.ok) {
-    throw new Error("Request failed");
+    const body = await res.text().catch(() => "");
+    throw new Error(`Request failed (${res.status}): ${body}`);
   }
 
   return res.json();

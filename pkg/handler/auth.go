@@ -10,7 +10,7 @@ func (h *Handler) SignUp(c *gin.Context) {
 	var input todo.User
 
 	if err := c.BindJSON(&input); err != nil {
-		NewErrorResponse(c, 400, "invalid input body") // err.Error()
+		NewErrorResponse(c, 400, err.Error())
 		return
 	}
 	ctx := c.Request.Context()
@@ -38,13 +38,19 @@ func (h *Handler) SignIn(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-	token, err := h.services.Authorization.GenerateToken(ctx, input.Email, input.Password)
+	token, user, err := h.services.Authorization.GenerateToken(ctx, input.Email, input.Password)
 	if err != nil {
 		NewErrorResponse(c, 500, err.Error())
 		return
 	}
 	c.JSON(200, map[string]interface{}{
 		"token": token,
+		"user": map[string]interface{}{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+			"role":  user.Role,
+		},
 	})
 
 }

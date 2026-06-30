@@ -51,12 +51,13 @@ func (mr *MockAuthorizationMockRecorder) CreateUser(ctx, user interface{}) *gomo
 }
 
 // GenerateToken mocks base method.
-func (m *MockAuthorization) GenerateToken(ctx context.Context, email, password string) (string, error) {
+func (m *MockAuthorization) GenerateToken(ctx context.Context, email, password string) (string, todo.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateToken", ctx, email, password)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(todo.User)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GenerateToken indicates an expected call of GenerateToken.
@@ -232,10 +233,10 @@ func (m *MockProduct) EXPECT() *MockProductMockRecorder {
 }
 
 // CreateProduct mocks base method.
-func (m *MockProduct) CreateProduct(ctx context.Context, input todo.CreateProductInput, sellerID uint) (int, error) {
+func (m *MockProduct) CreateProduct(ctx context.Context, input todo.CreateProductInput, sellerID uint) (todo.Product, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateProduct", ctx, input, sellerID)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(todo.Product)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -247,7 +248,7 @@ func (mr *MockProductMockRecorder) CreateProduct(ctx, input, sellerID interface{
 }
 
 // DeleteProduct mocks base method.
-func (m *MockProduct) DeleteProduct(ctx context.Context, id int) error {
+func (m *MockProduct) DeleteProduct(ctx context.Context, id uint) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteProduct", ctx, id)
 	ret0, _ := ret[0].(error)
@@ -329,7 +330,7 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // CreateOrder mocks base method.
-func (m *MockOrder) CreateOrder(ctx context.Context, userID uint, items []todo.OrderItem) (int, error) {
+func (m *MockOrder) CreateOrder(ctx context.Context, userID uint, items []todo.CreateOrderItem) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrder", ctx, userID, items)
 	ret0, _ := ret[0].(int)

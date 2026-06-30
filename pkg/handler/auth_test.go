@@ -48,7 +48,7 @@ func TestHandler_SignUp(t *testing.T) {
 			inputBody:            `{"password":"qwerty","role":"customer"}`,
 			mockBehavior:         func(s *mock_service.MockAuthorization, user todo.User) {},
 			expectedStatusCode:   400,
-			expectedResponseBody: `{"message":"invalid input body"}`,
+			expectedResponseBody: `{"message":"Key: 'User.Name' Error:Field validation for 'Name' failed on the 'required' tag\nKey: 'User.Email' Error:Field validation for 'Email' failed on the 'required' tag"}`,
 		},
 		{
 			name:      "Service Failure",

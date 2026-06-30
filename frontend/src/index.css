@@ -1,20 +1,21 @@
-*{
+* {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
 }
 
-body{
-  height: 100vh;
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f0f2f5;
+  transition: background 0.25s ease;
 }
-.App {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-main {
-  flex: 1;
-}
-.ul {
+
+ul {
   list-style: none;
+}
+
+a {
+  text-decoration: none;
 }
